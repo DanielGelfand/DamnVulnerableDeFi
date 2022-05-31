@@ -11,7 +11,7 @@ function calculateTokenToEthInputPrice(tokensSold, tokensInReserve, etherInReser
     )
 }
 
-describe.only('[Challenge] Puppet', function () {
+describe('[Challenge] Puppet', function () {
     let deployer, attacker;
 
     // Uniswap exchange will start with 10 DVT and 10 ETH in liquidity
