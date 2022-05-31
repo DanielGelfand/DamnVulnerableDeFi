@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 
-describe.only('Compromised challenge', function () {
+describe('Compromised challenge', function () {
 
     const sources = [
         '0xA73209FB1a42495120166736362A1DfA9F95A105',
