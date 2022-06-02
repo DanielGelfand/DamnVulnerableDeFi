@@ -5,7 +5,7 @@ const routerJson = require("@uniswap/v2-periphery/build/UniswapV2Router02.json")
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
 
-describe.only('[Challenge] Puppet v2', function () {
+describe('[Challenge] Puppet v2', function () {
     let deployer, attacker;
 
     // Uniswap v2 exchange will start with 100 tokens and 10 WETH in liquidity
